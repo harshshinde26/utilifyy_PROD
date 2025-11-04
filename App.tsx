@@ -273,6 +273,9 @@ const App: React.FC = () => {
                     </div>
                      {/* Theme toggle removed from header, now only in sidebar */}
                 </header>
+
+                
+
                 
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary dark:to-primary">
                     <div className="max-w-4xl mx-auto">
@@ -289,9 +292,46 @@ const App: React.FC = () => {
                         )}
                     </div>
                 </main>
+                
+
+
+
             </div>
+            
+            
+
+
         </div>
+            
+              
+
     );
 };
 
-export default App;
+
+
+function AboutUs() {
+    return (
+      <div className="p-8 max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4 text-accent">About Utilifyy</h1>
+        <p className="text-gray-700 dark:text-text-primary leading-relaxed">Utilifyy is a comprehensive collection of free online utility tools designed to make your daily tasks easier and more efficient. Founded with the mission to provide accessible, privacy-focused tools for everyone, we offer a wide range of calculators, converters, and utilities that work entirely in your browser.
+        </p>
+        <h2 className="text-3xl font-bold mb-4 text-accent">Our Mission</h2>
+        <p className="mt-4 text-gray-600 dark:text-text-secondary">
+        <p>We believe that essential online tools should be free, fast, and respect user privacy. That's why all Utilifyy tools run entirely in your browser - your data never leaves your device.</p>
+        </p>
+        <h2 className="text-3xl font-bold mb-4 text-accent">What We Offer</h2>
+        <ul className="text-gray-700 dark:text-text-primary leading-relaxed">
+            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Financial calculators for loan planning and investment</li>
+            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Unit converters for everyday measurements</li>
+            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Text tools for writing and editing</li>
+            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Image tools for photo editing</li>
+            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Time management utilities</li>
+            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Developer tools for web design</li>
+        </ul>
+      </div>
+    );
+  }
+
+  export default App;
+  
