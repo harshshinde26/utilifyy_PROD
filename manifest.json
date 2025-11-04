@@ -1,0 +1,9 @@
+{
+  "name": "utilifyy - All-in-One Utility Tools",
+  "short_name": "utilifyy",
+  "description": "A comprehensive, client-side web application offering a suite of free utility tools including converters, time tools, text manipulators, and calculators. Designed for speed, efficiency, and a great user experience.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D1117",
+  "theme_color": "#161B22"
+}
