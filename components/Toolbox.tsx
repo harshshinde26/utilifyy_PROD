@@ -2780,15 +2780,26 @@ const LandingPage = () => {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Contact</h3>
               <p className="text-sm text-gray-600 dark:text-text-secondary">
-                Have suggestions or feedback? Reach out to us at support@utilifyy.com
+                Have suggestions or feedback? Reach out to us at harshshinde818@gmail.com
               </p>
             </div>
           </div>
           <div className="border-t border-gray-200 dark:border-border pt-6 text-center text-sm text-gray-600 dark:text-text-secondary">
-            <p>© 2025 Utilifyy. All rights reserved. Free online tools for everyone.</p>
+            <p>Free online tools for everyone.</p>
             <p className="mt-2">Privacy-first • No tracking • Always free</p>
           </div>
         </footer>
+        <footer className="text-center text-sm text-gray-500 dark:text-text-secondary py-6">
+            <nav className="space-x-4">
+            <a href="/about" className="hover:text-accent">About Us</a>
+            <a href="/privacy" className="hover:text-accent">Privacy Policy</a>
+            <a href="/contact" className="hover:text-accent">Contact Us</a>
+            </nav>
+            <p className="mt-2">© {new Date().getFullYear()} Utilifyy. All rights reserved.</p>
+        </footer>
+
+
+
       </div>
     );
   };
