@@ -1,0 +1,105 @@
+<h1>About Utilifyy</h1>
+<p>
+Welcome to <strong>Utilifyy</strong> — your all-in-one free online toolkit built for speed, privacy, and simplicity. 
+Our goal is to make everyday digital tasks easier, faster, and more accessible — all without requiring logins or downloads.
+</p>
+
+<p>
+From calculators and converters to time trackers and text tools, Utilifyy helps you get work done instantly — 
+all client-side, meaning your data never leaves your browser.
+</p>
+
+<h2>Why We Built Utilifyy</h2>
+<p>
+We noticed that small but important tools — like unit converters, stopwatches, and password generators — 
+were often hidden behind ads or complex interfaces. So we built Utilifyy: 
+a single, clean, fast web app for all essential daily utilities.
+</p>
+
+<h2>Our Mission</h2>
+<p>
+To provide a collection of lightweight, reliable, and privacy-first tools that anyone can use freely — 
+anytime, anywhere, on any device.
+</p>
+
+<p><strong>Utilifyy</strong> – Simple tools. Super fast. Always free.</p>
+
+<h1>Privacy Policy</h1>
+<p>Last updated: November 2025</p>
+
+<p>
+Your privacy is important to us. Utilifyy is designed as a <strong>client-side web app</strong>, 
+which means all calculations, conversions, and actions happen directly in your browser. 
+We do <strong>not collect, store, or share</strong> any personal data.
+</p>
+
+<h2>Information Collection</h2>
+<p>
+Utilifyy does not require registration or personal details. 
+No form data, text input, or tool results are transmitted to any server.
+</p>
+
+<h2>Cookies and Analytics</h2>
+<p>
+We may use <strong>Google AdSense</strong> to display ads. Google may use cookies to personalize ad content 
+and measure ad performance. You can control or disable ad personalization in your Google account settings.
+</p>
+
+<h2>Third-Party Services</h2>
+<p>
+Some tools or ads may link to external websites. Utilifyy is not responsible for their privacy policies. 
+We encourage you to read their terms before interacting.
+</p>
+
+<h2>Contact</h2>
+<p>
+For questions about this Privacy Policy, you can reach us at <a href="mailto:support@utilifyy.com">support@utilifyy.com</a>.
+</p>
+
+<h1>Terms of Use</h1>
+<p>Effective from: November 2025</p>
+
+<p>
+By using Utilifyy, you agree to these terms. Utilifyy provides free web-based tools 
+for general use. These tools are offered “as is,” without warranties of any kind.
+</p>
+
+<h2>Acceptable Use</h2>
+<p>
+You agree not to misuse or attempt to interfere with the normal operation of the website or its tools.
+You may freely use Utilifyy for personal or educational purposes.
+</p>
+
+<h2>Disclaimer</h2>
+<p>
+While we strive for accuracy, Utilifyy is not responsible for any loss or error 
+arising from tool usage or generated results.
+</p>
+
+<h2>Advertising</h2>
+<p>
+Utilifyy displays ads via Google AdSense. We do not control ad content served by Google.
+</p>
+
+<h2>Changes to Terms</h2>
+<p>
+We may update these terms occasionally. Continued use after updates constitutes acceptance of the new terms.
+</p>
+
+<p>
+For questions, contact <a href="mailto:support@utilifyy.com">support@utilifyy.com</a>.
+</p>
+
+<h1>Contact Us</h1>
+<p>
+We’d love to hear from you! Whether it’s feedback, a bug report, or a new tool suggestion — 
+your input helps us make Utilifyy better.
+</p>
+
+--keep original feedback system
+
+<p>
+You can also reach us through our social handles (coming soon) for quick updates and feature requests.
+</p>
+
+<p>Thank you for using Utilifyy!</p>

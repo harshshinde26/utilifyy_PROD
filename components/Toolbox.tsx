@@ -2456,7 +2456,7 @@ const PhotoEditor: React.FC<ToolProps> = () => {
         </ToolCard>
     );
 };
-
+/* old version landing page
 const LandingPage: React.FC<ToolProps> = () => {
     const categories = [
         { name: 'Time', description: 'Precision tools for time management.', icon: <Icons.TimerIcon /> },
@@ -2542,6 +2542,257 @@ const LandingPage: React.FC<ToolProps> = () => {
         </div>
     );
 };
+*/
+
+// Enhanced Landing Page Component with Rich Content for AdSense
+const LandingPage = () => {
+    const tools = [
+      {
+        category: 'Time Management Tools',
+        description: 'Professional time tracking and management utilities for productivity',
+        tools: [
+          { name: 'Stopwatch', desc: 'High-precision stopwatch with lap timing for sports, workouts, and time tracking' },
+          { name: 'Timer', desc: 'Countdown timer with audio alerts for cooking, studying, and time management' },
+          { name: 'World Clock', desc: 'Multi-timezone clock for international business and travel planning' },
+          { name: 'Chess Clock', desc: 'Dual player timer for chess, board games, and competitive activities' }
+        ]
+      },
+      {
+        category: 'Financial Calculators',
+        description: 'Advanced financial tools for investment planning and money management',
+        tools: [
+          { name: 'EMI Calculator', desc: 'Calculate monthly loan payments for home loans, car loans, and personal loans' },
+          { name: 'SIP Calculator', desc: 'Systematic Investment Plan calculator for mutual fund investments' },
+          { name: 'Compound Interest', desc: 'Calculate compound interest for long-term investments and savings' },
+          { name: 'Simple Interest', desc: 'Quick simple interest calculator for loans and deposits' },
+          { name: 'Discount Calculator', desc: 'Calculate sale prices, discounts, and savings on purchases' },
+          { name: 'Tip Calculator', desc: 'Split bills and calculate tips for dining and services' },
+          { name: 'Profit & Loss', desc: 'Calculate profit margins and losses for business transactions' }
+        ]
+      },
+      {
+        category: 'Unit Converters',
+        description: 'Comprehensive unit conversion tools for everyday calculations',
+        tools: [
+          { name: 'Length Converter', desc: 'Convert between meters, feet, inches, kilometers, and miles' },
+          { name: 'Weight Converter', desc: 'Convert kilograms, pounds, ounces, and other weight units' },
+          { name: 'Temperature Converter', desc: 'Convert Celsius, Fahrenheit, and Kelvin temperatures' },
+          { name: 'Currency Converter', desc: 'Real-time currency exchange rates for global currencies' }
+        ]
+      },
+      {
+        category: 'Text Tools',
+        description: 'Professional text editing and formatting utilities',
+        tools: [
+          { name: 'Word Counter', desc: 'Count words, characters, sentences, and paragraphs in your text' },
+          { name: 'Case Converter', desc: 'Convert text to uppercase, lowercase, title case, and sentence case' },
+          { name: 'Lorem Ipsum Generator', desc: 'Generate placeholder text for design and development projects' },
+          { name: 'Emoji Remover', desc: 'Clean text by removing emojis and special characters' }
+        ]
+      },
+      {
+        category: 'Health & Lifestyle',
+        description: 'Health calculators for wellness and lifestyle management',
+        tools: [
+          { name: 'BMI Calculator', desc: 'Calculate Body Mass Index to assess healthy weight ranges' },
+          { name: 'Age Calculator', desc: 'Calculate exact age and days until next birthday' }
+        ]
+      },
+      {
+        category: 'Image Tools',
+        description: 'Professional image editing and optimization tools',
+        tools: [
+          { name: 'Image Resizer', desc: 'Resize and compress images for web and social media' },
+          { name: 'Photo Editor', desc: 'Edit photos with filters, adjustments, and text overlays' }
+        ]
+      },
+      {
+        category: 'Developer Tools',
+        description: 'Essential utilities for web developers and designers',
+        tools: [
+          { name: 'Password Generator', desc: 'Create strong, secure passwords with customizable options' },
+          { name: 'Color Picker', desc: 'Pick colors and get HEX, RGB codes for web design' }
+        ]
+      }
+    ];
+  
+    const features = [
+      {
+        title: 'Privacy First',
+        desc: 'All calculations happen in your browser. Your data never leaves your device.',
+        icon: '🔒'
+      },
+      {
+        title: 'Always Free',
+        desc: 'No subscriptions, no hidden fees. All tools are completely free to use.',
+        icon: '💰'
+      },
+      {
+        title: 'No Login Required',
+        desc: 'Start using tools immediately without creating an account.',
+        icon: '⚡'
+      },
+      {
+        title: 'Mobile Friendly',
+        desc: 'Fully responsive design works perfectly on all devices.',
+        icon: '📱'
+      }
+    ];
+  
+    return (
+      <div className="space-y-12">
+        {/* Hero Section */}
+        <section className="text-center p-8 bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg shadow-lg">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Free Online Utility Tools - Utilifyy
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-text-secondary mb-6">
+            Your Complete Toolkit for Everyday Tasks
+          </p>
+          <p className="max-w-3xl mx-auto text-gray-700 dark:text-text-primary leading-relaxed">
+            Utilifyy is a comprehensive collection of free online tools designed to make your daily tasks easier. 
+            From financial calculators to text editors, unit converters to image tools, we provide everything you need 
+            in one convenient location. All tools work directly in your browser with complete privacy - no data is ever sent to our servers.
+          </p>
+        </section>
+  
+        {/* Features */}
+        <section>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Why Choose Utilifyy?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, idx) => (
+              <div key={idx} className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-6 text-center">
+                <div className="text-4xl mb-3">{feature.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-text-secondary">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+  
+        {/* Tools Categories */}
+        {tools.map((category, idx) => (
+          <section key={idx} className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{category.category}</h2>
+            <p className="text-gray-600 dark:text-text-secondary mb-6">{category.description}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {category.tools.map((tool, tidx) => (
+                <div key={tidx} className="border-l-4 border-accent pl-4 py-2">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{tool.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-text-secondary">{tool.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+  
+        {/* How to Use */}
+        <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">How to Use Utilifyy Tools</h2>
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <span className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold mr-4">1</span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Select Your Tool</h3>
+                <p className="text-gray-600 dark:text-text-secondary">Browse through our categories in the sidebar and click on any tool you need.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <span className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold mr-4">2</span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Enter Your Data</h3>
+                <p className="text-gray-600 dark:text-text-secondary">Input your values, text, or upload files as needed for the specific tool.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <span className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold mr-4">3</span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Get Instant Results</h3>
+                <p className="text-gray-600 dark:text-text-secondary">All calculations and conversions happen instantly in your browser.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+  
+        {/* Blog-style Content */}
+        <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Understanding Financial Calculators</h2>
+          <div className="prose dark:prose-invert max-w-none">
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Financial planning is crucial for achieving your monetary goals. Our suite of financial calculators helps you make informed decisions about loans, investments, and savings. Whether you're planning to buy a home, invest in mutual funds, or simply want to understand your returns, these tools provide accurate calculations instantly.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">EMI Calculator: Plan Your Loan Repayment</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              An EMI (Equated Monthly Installment) calculator helps you determine your monthly loan payment amount. By inputting your loan amount, interest rate, and tenure, you can see exactly how much you'll pay each month and the total interest over the loan period. This is essential for budgeting and comparing loan offers from different lenders.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">SIP Calculator: Grow Your Wealth</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Systematic Investment Plans (SIP) are one of the most popular investment methods in mutual funds. Our SIP calculator shows you how small, regular investments can grow into substantial wealth over time through the power of compounding. Input your monthly investment, expected return rate, and investment period to see your potential returns.
+            </p>
+          </div>
+        </section>
+  
+        {/* FAQ Section */}
+        <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Are Utilifyy tools really free?</h3>
+              <p className="text-gray-600 dark:text-text-secondary">Yes, all our tools are completely free to use. There are no hidden charges, premium features, or subscription plans. We believe in providing accessible utilities for everyone.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Is my data safe?</h3>
+              <p className="text-gray-600 dark:text-text-secondary">Absolutely. All tools run entirely in your browser using client-side JavaScript. Your data never leaves your device, and we don't store any information on our servers.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Do I need to create an account?</h3>
+              <p className="text-gray-600 dark:text-text-secondary">No account is required. Simply visit the website and start using any tool immediately.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Can I use these tools on mobile?</h3>
+              <p className="text-gray-600 dark:text-text-secondary">Yes, Utilifyy is fully responsive and works perfectly on all devices including smartphones, tablets, and desktop computers.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">How accurate are the calculators?</h3>
+              <p className="text-gray-600 dark:text-text-secondary">Our calculators use industry-standard formulas and are thoroughly tested for accuracy. However, they should be used for estimation purposes. For critical financial decisions, please consult with a professional advisor.</p>
+            </div>
+          </div>
+        </section>
+  
+        {/* Footer Content */}
+        <footer className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">About Utilifyy</h3>
+              <p className="text-sm text-gray-600 dark:text-text-secondary">
+                Utilifyy is your one-stop destination for free online utility tools. We're committed to providing fast, reliable, and privacy-focused tools for everyday tasks.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Popular Tools</h3>
+              <ul className="text-sm text-gray-600 dark:text-text-secondary space-y-2">
+                <li>• EMI Calculator</li>
+                <li>• Unit Converter</li>
+                <li>• Password Generator</li>
+                <li>• Image Resizer</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Contact</h3>
+              <p className="text-sm text-gray-600 dark:text-text-secondary">
+                Have suggestions or feedback? Reach out to us at support@utilifyy.com
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 dark:border-border pt-6 text-center text-sm text-gray-600 dark:text-text-secondary">
+            <p>© 2025 Utilifyy. All rights reserved. Free online tools for everyone.</p>
+            <p className="mt-2">Privacy-first • No tracking • Always free</p>
+          </div>
+        </footer>
+      </div>
+    );
+  };
+
 
 export const AllTools = {
     Stopwatch, Timer, WorldClock, ChessClock, UnitConverter, BMICalculator, AgeCalculator,
