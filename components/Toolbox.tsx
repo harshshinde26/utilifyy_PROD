@@ -1464,21 +1464,21 @@ const SimpleInterestCalculator: React.FC<ToolProps> = ({ selectedCurrency = defa
                     <div className="flex gap-2">
                         <Input 
                             type="number" 
-                            min="1000" 
+                            min="1" 
                             max="10000000" 
-                            step="1000"
+                            step="1"
                             value={principal} 
                             onChange={e => {
-                                const val = Math.max(1000, Math.min(10000000, Number(e.target.value) || 1000));
+                                const val = Math.max(1, Math.min(10000000, Number(e.target.value) || 1));
                                 setPrincipal(val);
                             }}
                             className="flex-1"
                         />
                         <input 
                             type="range" 
-                            min="1000" 
+                            min="1" 
                             max="1000000" 
-                            step="1000" 
+                            step="1" 
                             value={principal} 
                             onChange={e => setPrincipal(Number(e.target.value))} 
                             className="flex-1 h-2 bg-gray-200 dark:bg-secondary rounded-lg appearance-none cursor-pointer accent-accent" 
@@ -1623,21 +1623,21 @@ const SIPCalculator: React.FC<ToolProps> = ({ selectedCurrency = defaultCurrency
                         <div className="flex gap-2">
                             <Input 
                                 type="number" 
-                                min="500" 
+                                min="1" 
                                 max="1000000" 
-                                step="500"
+                                step="1"
                                 value={investment} 
                                 onChange={e => {
-                                    const val = Math.max(500, Math.min(1000000, Number(e.target.value) || 500));
+                                    const val = Math.max(1, Math.min(1000000, Number(e.target.value) || 1));
                                     setInvestment(val);
                                 }}
                                 className="flex-1"
                             />
                             <input 
                                 type="range" 
-                                min="500" 
+                                min="1" 
                                 max="100000" 
-                                step="500" 
+                                step="1" 
                                 value={investment} 
                                 onChange={e => setInvestment(Number(e.target.value))} 
                                 className="flex-1 h-2 bg-gray-200 dark:bg-secondary rounded-lg appearance-none cursor-pointer accent-accent" 
@@ -1778,21 +1778,21 @@ const CompoundInterestCalculator: React.FC<ToolProps> = ({ selectedCurrency = de
                         <div className="flex gap-2">
                             <Input 
                                 type="number" 
-                                min="1000" 
+                                min="1" 
                                 max="10000000" 
-                                step="1000"
+                                step="1"
                                 value={principal} 
                                 onChange={e => {
-                                    const val = Math.max(1000, Math.min(10000000, Number(e.target.value) || 1000));
+                                    const val = Math.max(1, Math.min(10000000, Number(e.target.value) || 1));
                                     setPrincipal(val);
                                 }}
                                 className="flex-1"
                             />
                             <input 
                                 type="range" 
-                                min="1000" 
+                                min="1" 
                                 max="1000000" 
-                                step="1000" 
+                                step="1" 
                                 value={principal} 
                                 onChange={e => setPrincipal(Number(e.target.value))} 
                                 className="flex-1 h-2 bg-gray-200 dark:bg-secondary rounded-lg appearance-none cursor-pointer accent-accent" 
