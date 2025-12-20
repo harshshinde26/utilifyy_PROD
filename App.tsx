@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { AllTools } from './components/Toolbox';
 import { Tool, Currency } from './types';
 import * as Icons from './components/Icons';
+import AboutUs from './src/pages/AboutUs';
+import PrivacyPolicy from './src/pages/PrivacyPolicy';
+import ContactUs from './src/pages/ContactUs';
 
 const tools: Tool[] = [
     // Time
@@ -37,6 +40,13 @@ const tools: Tool[] = [
     // Image
     { id: 'image_resizer', name: 'Image Resizer & Compressor', description: 'Resize and compress images.', category: 'Image', icon: <Icons.PhotographIcon />, component: AllTools.ImageResizer },
     { id: 'photo_editor', name: 'Photo Editor', description: 'Edit photos with filters, adjustments, and text. Works entirely offline.', category: 'Image', icon: <Icons.PhotographIcon />, component: AllTools.PhotoEditor },
+    { id: 'image_to_text', name: 'Image to Text (OCR)', description: 'Extract text from images and screenshots using OCR.', category: 'Image', icon: <Icons.DocumentTextIcon />, component: AllTools.ImageToText },
+    { id: 'image_drawer', name: 'Image Drawer & Editor', description: 'Draw, add shapes, text, and stickers on images. Perfect for memes and annotations.', category: 'Image', icon: <Icons.PhotographIcon />, component: AllTools.ImageDrawer },
+    // PDF
+    { id: 'pdf_compressor', name: 'PDF Compressor', description: 'Compress PDF files to reduce file size.', category: 'PDF', icon: <Icons.DocumentIcon />, component: AllTools.PDFCompressor },
+    { id: 'pdf_merge', name: 'PDF Merge', description: 'Merge multiple PDF files into one document.', category: 'PDF', icon: <Icons.DocumentIcon />, component: AllTools.PDFMerge },
+    { id: 'pdf_to_images', name: 'PDF to Images', description: 'Convert PDF pages to image files.', category: 'PDF', icon: <Icons.DocumentIcon />, component: AllTools.PDFToImages },
+    { id: 'images_to_pdf', name: 'Images to PDF', description: 'Convert multiple images into a single PDF document.', category: 'PDF', icon: <Icons.DocumentIcon />, component: AllTools.ImagesToPDF },
 ];
 
 const currencies: Currency[] = [
@@ -102,11 +112,29 @@ const App: React.FC = () => {
     });
 
     // Hash-based routing and SEO title/meta updates
+    const [currentPage, setCurrentPage] = useState<'tool' | 'about' | 'privacy' | 'contact' | null>(null);
+    
     useEffect(() => {
         const handleHashChange = () => {
             const hash = window.location.hash.replace('#/', '');
             const toolExists = tools.some(tool => tool.id === hash);
-            setActiveToolId(toolExists ? hash : null);
+            
+            if (hash === 'about') {
+                setCurrentPage('about');
+                setActiveToolId(null);
+            } else if (hash === 'privacy') {
+                setCurrentPage('privacy');
+                setActiveToolId(null);
+            } else if (hash === 'contact') {
+                setCurrentPage('contact');
+                setActiveToolId(null);
+            } else if (toolExists) {
+                setCurrentPage('tool');
+                setActiveToolId(hash);
+            } else {
+                setCurrentPage(null);
+                setActiveToolId(null);
+            }
         };
         window.addEventListener('hashchange', handleHashChange);
         handleHashChange(); // Initial check on page load
@@ -279,7 +307,13 @@ const App: React.FC = () => {
                 
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary dark:to-primary">
                     <div className="max-w-4xl mx-auto">
-                         {activeTool ? (
+                         {currentPage === 'about' ? (
+                            <AboutUs />
+                        ) : currentPage === 'privacy' ? (
+                            <PrivacyPolicy />
+                        ) : currentPage === 'contact' ? (
+                            <ContactUs />
+                        ) : activeTool ? (
                             <>
                                 <header className="mb-8 text-center">
                                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">{activeTool.name}</h2>
@@ -310,31 +344,6 @@ const App: React.FC = () => {
 
 
 
-function AboutUs() {
-    return (
-      <div className="p-8 max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-accent">About Utilifyy</h1>
-        <p className="text-gray-700 dark:text-text-primary leading-relaxed">Utilifyy is a comprehensive collection of free online utility tools designed to make your daily tasks easier and more efficient. Founded with the mission to provide accessible, privacy-focused tools for everyone, we offer a wide range of calculators, converters, and utilities that work entirely in your browser.
-        </p>
-        <h2 className="text-3xl font-bold mb-4 text-accent">Our Mission</h2>
-        <p className="mt-4 text-gray-600 dark:text-text-secondary">
-        <p>We believe that essential online tools should be free, fast, and respect user privacy. That's why all Utilifyy tools run entirely in your browser - your data never leaves your device.</p>
-        </p>
-        <h2 className="text-3xl font-bold mb-4 text-accent">What We Offer</h2>
-        <ul className="text-gray-700 dark:text-text-primary leading-relaxed">
-            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Financial calculators for loan planning and investment</li>
-            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Unit converters for everyday measurements</li>
-            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Text tools for writing and editing</li>
-            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Image tools for photo editing</li>
-            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Time management utilities</li>
-            <li className="text-gray-700 dark:text-text-primary leading-relaxed">Developer tools for web design</li>
-        </ul>
-      </div>
-    );
-  }
- 
-
-  
 
   export default App;
   

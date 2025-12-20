@@ -1272,9 +1272,9 @@ const EMICalculator: React.FC<ToolProps> = ({ selectedCurrency = defaultCurrency
                         <div className="flex gap-2">
                             <Input 
                                 type="number" 
-                                min="1000" 
+                                min="1" 
                                 max="10000000" 
-                                step="1000"
+                                step="1"
                                 value={principal} 
                                 onChange={e => {
                                     const val = Math.max(1000, Math.min(10000000, Number(e.target.value) || 1000));
@@ -1284,9 +1284,9 @@ const EMICalculator: React.FC<ToolProps> = ({ selectedCurrency = defaultCurrency
                             />
                             <input 
                                 type="range" 
-                                min="1000" 
+                                min="1" 
                                 max="1000000" 
-                                step="1000" 
+                                step="1" 
                                 value={principal} 
                                 onChange={e => setPrincipal(Number(e.target.value))} 
                                 className="flex-1 h-2 bg-gray-200 dark:bg-secondary rounded-lg appearance-none cursor-pointer accent-accent" 
@@ -2456,6 +2456,1311 @@ const PhotoEditor: React.FC<ToolProps> = () => {
         </ToolCard>
     );
 };
+
+const ImageToText: React.FC<ToolProps> = () => {
+    const [image, setImage] = useState<string | null>(null);
+    const [extractedText, setExtractedText] = useState<string>('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [status, setStatus] = useState<string>('');
+    const [language, setLanguage] = useState('eng');
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setImage(event.target?.result as string);
+                setExtractedText('');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const extractText = async () => {
+        if (!image) return;
+
+        setIsProcessing(true);
+        setProgress(0);
+        setExtractedText('');
+        setStatus('Loading Tesseract.js...');
+
+        try {
+            // Dynamically import tesseract.js to avoid loading it until needed
+            setStatus('Importing Tesseract.js...');
+            setProgress(5);
+            const { createWorker } = await import('tesseract.js');
+            
+            setStatus('Creating worker...');
+            setProgress(10);
+            const worker = await createWorker(language, 1, {
+                logger: (m) => {
+                    // Update progress and status for all stages
+                    if (m.status === 'loading tesseract core') {
+                        setStatus('Loading Tesseract core...');
+                        setProgress(15);
+                    } else if (m.status === 'initializing tesseract') {
+                        setStatus('Initializing Tesseract...');
+                        setProgress(25);
+                    } else if (m.status === 'loading language traineddata') {
+                        setStatus(`Loading ${language} language data...`);
+                        setProgress(35);
+                    } else if (m.status === 'initializing api') {
+                        setStatus('Initializing API...');
+                        setProgress(45);
+                    } else if (m.status === 'recognizing text') {
+                        setStatus('Recognizing text...');
+                        // Progress from 45% to 95% during recognition
+                        const recognitionProgress = 45 + (m.progress * 50);
+                        setProgress(Math.round(recognitionProgress));
+                    }
+                }
+            });
+
+            setStatus('Processing image...');
+            setProgress(50);
+            const { data: { text } } = await worker.recognize(image);
+            
+            setStatus('Finalizing...');
+            setProgress(100);
+            setExtractedText(text);
+            
+            await worker.terminate();
+            setStatus('Complete!');
+        } catch (error) {
+            console.error('OCR Error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setExtractedText(`Error extracting text: ${errorMessage}. Please try again with a clearer image.`);
+            setStatus('Error occurred');
+            setProgress(0);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(extractedText);
+    };
+
+    const downloadText = () => {
+        const blob = new Blob([extractedText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'extracted-text.txt';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    return (
+        <ToolCard title="Image to Text (OCR)">
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-2">
+                        Select Language
+                    </label>
+                    <Select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="mb-4"
+                    >
+                        <option value="eng">English</option>
+                        <option value="spa">Spanish</option>
+                        <option value="fra">French</option>
+                        <option value="deu">German</option>
+                        <option value="por">Portuguese</option>
+                        <option value="chi_sim">Chinese (Simplified)</option>
+                        <option value="jpn">Japanese</option>
+                        <option value="kor">Korean</option>
+                        <option value="ara">Arabic</option>
+                        <option value="hin">Hindi</option>
+                    </Select>
+                </div>
+
+                <Input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload}
+                    disabled={isProcessing}
+                />
+
+                {image && (
+                    <div className="space-y-4">
+                        <div className="flex flex-col items-center">
+                            <img 
+                                src={image} 
+                                alt="Uploaded" 
+                                className="max-w-full h-auto max-h-64 rounded-lg shadow-md mb-4"
+                            />
+                        </div>
+
+                        {!isProcessing && (
+                            <Button 
+                                onClick={extractText} 
+                                className="w-full"
+                            >
+                                Extract Text
+                            </Button>
+                        )}
+
+                        {isProcessing && (
+                            <div className="space-y-2">
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                    <div 
+                                        className="bg-accent h-2.5 rounded-full transition-all duration-300"
+                                        style={{ width: `${Math.max(progress, 5)}%` }}
+                                    />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium text-gray-700 dark:text-text-primary">
+                                        {status || 'Processing...'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-text-secondary mt-1">
+                                        {progress}%
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {extractedText && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-sm font-medium text-gray-700 dark:text-text-secondary">
+                                        Extracted Text
+                                    </label>
+                                    <div className="space-x-2">
+                                        <Button 
+                                            onClick={copyToClipboard} 
+                                            variant="secondary" 
+                                            className="text-xs px-3 py-1"
+                                        >
+                                            Copy
+                                        </Button>
+                                        <Button 
+                                            onClick={downloadText} 
+                                            variant="secondary" 
+                                            className="text-xs px-3 py-1"
+                                        >
+                                            Download
+                                        </Button>
+                                    </div>
+                                </div>
+                                <textarea
+                                    value={extractedText}
+                                    readOnly
+                                    className="w-full h-48 bg-gray-50 dark:bg-secondary border border-gray-300 dark:border-border rounded-md p-3 text-gray-900 dark:text-text-primary resize-none font-mono text-sm"
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <div className="mt-4 p-3 bg-accent/10 dark:bg-accent/20 rounded-lg border border-accent/20">
+                    <p className="text-xs text-gray-600 dark:text-text-secondary">
+                        <strong>Tip:</strong> For best results, use clear, high-contrast images with readable text. 
+                        The first run may take longer as Tesseract.js loads the language data.
+                    </p>
+                </div>
+            </div>
+        </ToolCard>
+    );
+};
+
+// PDF Tools
+const PDFCompressor: React.FC<ToolProps> = () => {
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [originalSize, setOriginalSize] = useState<number>(0);
+    const [compressedSize, setCompressedSize] = useState<number>(0);
+    const [progress, setProgress] = useState<number>(0);
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setPdfFile(file);
+            setOriginalSize(file.size);
+            setCompressedSize(0);
+        }
+    };
+
+    const compressPDF = async () => {
+        if (!pdfFile) return;
+
+        setIsProcessing(true);
+        setProgress(0);
+        try {
+            const { PDFDocument } = await import('pdf-lib');
+            const pdfjsLib = await import('pdfjs-dist');
+            
+            // Configure PDF.js worker
+            const version = pdfjsLib.version || '3.11.174';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
+            
+            const arrayBuffer = await pdfFile.arrayBuffer();
+            
+            // Load PDF with pdf.js to render pages
+            const loadingTask = pdfjsLib.getDocument({ 
+                data: arrayBuffer,
+                verbosity: 0,
+                useWorkerFetch: false,
+                isEvalSupported: false
+            });
+            const pdf = await loadingTask.promise;
+            const numPages = pdf.numPages;
+            
+            // Create new PDF with pdf-lib
+            const compressedPdf = await PDFDocument.create();
+            const quality = 0.7; // JPEG quality for compression (0.7 = 70% quality)
+            
+            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 }); // Slightly reduce scale for compression
+                
+                // Render page to canvas
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                if (!context) throw new Error('Could not get canvas context');
+                
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                // Convert canvas to JPEG blob with compression
+                const imageBlob = await new Promise<Blob>((resolve, reject) => {
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Failed to create image blob'));
+                    }, 'image/jpeg', quality);
+                });
+                
+                // Embed compressed image into PDF
+                const imageBytes = await imageBlob.arrayBuffer();
+                const jpgImage = await compressedPdf.embedJpg(imageBytes);
+                
+                // Add page with compressed image
+                const pdfPage = compressedPdf.addPage([viewport.width, viewport.height]);
+                pdfPage.drawImage(jpgImage, {
+                    x: 0,
+                    y: 0,
+                    width: viewport.width,
+                    height: viewport.height,
+                });
+                
+                setProgress(Math.round((pageNum / numPages) * 100));
+            }
+            
+            // Save compressed PDF
+            const pdfBytes = await compressedPdf.save({
+                useObjectStreams: false,
+                addDefaultPage: false,
+            });
+
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const newSize = blob.size;
+            setCompressedSize(newSize);
+
+            // Download if compression was successful
+            if (newSize < originalSize) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `compressed-${pdfFile.name}`;
+                link.click();
+                URL.revokeObjectURL(url);
+            } else {
+                const increasePercent = ((newSize - originalSize) / originalSize * 100).toFixed(1);
+                const shouldDownload = confirm(
+                    `The PDF size would increase by ${increasePercent}% (${formatFileSize(newSize)}). ` +
+                    `This PDF may already be optimized or contain mostly text. Would you like to download it anyway?`
+                );
+                
+                if (shouldDownload) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `compressed-${pdfFile.name}`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }
+            }
+        } catch (error) {
+            console.error('Compression error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            alert(`Error compressing PDF: ${errorMessage}. Please try again.`);
+        } finally {
+            setIsProcessing(false);
+            setProgress(0);
+        }
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    };
+
+    return (
+        <ToolCard title="PDF Compressor">
+            <div className="space-y-4">
+                <Input 
+                    type="file" 
+                    accept="application/pdf" 
+                    onChange={handleFileUpload}
+                    disabled={isProcessing}
+                />
+
+                {pdfFile && (
+                    <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-secondary rounded-lg">
+                            <p className="text-sm text-gray-600 dark:text-text-secondary">
+                                <strong>File:</strong> {pdfFile.name}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-text-secondary">
+                                <strong>Original Size:</strong> {formatFileSize(originalSize)}
+                            </p>
+                            {compressedSize > 0 && (
+                                <p className="text-sm text-accent">
+                                    <strong>Compressed Size:</strong> {formatFileSize(compressedSize)} 
+                                    ({Math.round((1 - compressedSize / originalSize) * 100)}% reduction)
+                                </p>
+                            )}
+                        </div>
+
+                        {isProcessing && (
+                            <div className="space-y-2">
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                    <div 
+                                        className="bg-accent h-2.5 rounded-full transition-all duration-300"
+                                        style={{ width: `${Math.max(progress, 5)}%` }}
+                                    />
+                                </div>
+                                <p className="text-sm text-center text-gray-600 dark:text-text-secondary">
+                                    Compressing... {progress}%
+                                </p>
+                            </div>
+                        )}
+
+                        {!isProcessing && (
+                            <Button 
+                                onClick={compressPDF} 
+                                className="w-full"
+                            >
+                                Compress PDF
+                            </Button>
+                        )}
+                    </div>
+                )}
+
+                <div className="p-3 bg-accent/10 dark:bg-accent/20 rounded-lg border border-accent/20">
+                    <p className="text-xs text-gray-600 dark:text-text-secondary">
+                        <strong>Note:</strong> PDF compression works by re-rendering pages as compressed JPEG images. 
+                        This works best for image-heavy PDFs. Text-heavy PDFs may not compress well or may increase in size. 
+                        Some quality loss may occur.
+                    </p>
+                </div>
+            </div>
+        </ToolCard>
+    );
+};
+
+const PDFMerge: React.FC<ToolProps> = () => {
+    const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handleFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files).filter(file => file.type === 'application/pdf');
+            setPdfFiles(files);
+        }
+    };
+
+    const mergePDFs = async () => {
+        if (pdfFiles.length < 2) {
+            alert('Please select at least 2 PDF files to merge.');
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const { PDFDocument } = await import('pdf-lib');
+            const mergedPdf = await PDFDocument.create();
+
+            for (const file of pdfFiles) {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await PDFDocument.load(arrayBuffer);
+                const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                pages.forEach((page) => mergedPdf.addPage(page));
+            }
+
+            const pdfBytes = await mergedPdf.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'merged.pdf';
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Merge error:', error);
+            alert('Error merging PDFs. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    return (
+        <ToolCard title="PDF Merge">
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-2">
+                        Select Multiple PDF Files
+                    </label>
+                    <Input 
+                        type="file" 
+                        accept="application/pdf" 
+                        multiple
+                        onChange={handleFilesUpload}
+                        disabled={isProcessing}
+                    />
+                </div>
+
+                {pdfFiles.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-secondary rounded-lg">
+                            <p className="text-sm font-medium text-gray-700 dark:text-text-primary mb-2">
+                                Selected Files ({pdfFiles.length}):
+                            </p>
+                            <ul className="text-xs text-gray-600 dark:text-text-secondary space-y-1 max-h-32 overflow-y-auto">
+                                {pdfFiles.map((file, index) => (
+                                    <li key={index}>{index + 1}. {file.name}</li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <Button 
+                            onClick={mergePDFs} 
+                            className="w-full"
+                            disabled={isProcessing || pdfFiles.length < 2}
+                        >
+                            {isProcessing ? 'Merging...' : 'Merge PDFs'}
+                        </Button>
+                    </div>
+                )}
+
+                <div className="p-3 bg-accent/10 dark:bg-accent/20 rounded-lg border border-accent/20">
+                    <p className="text-xs text-gray-600 dark:text-text-secondary">
+                        <strong>Tip:</strong> Select multiple PDF files. They will be merged in the order you select them.
+                    </p>
+                </div>
+            </div>
+        </ToolCard>
+    );
+};
+
+const PDFToImages: React.FC<ToolProps> = () => {
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setPdfFile(e.target.files[0]);
+            setProgress(0);
+            setTotalPages(0);
+        }
+    };
+
+    const convertToImages = async () => {
+        if (!pdfFile) return;
+
+        setIsProcessing(true);
+        setProgress(0);
+
+        try {
+            const pdfjsLib = await import('pdfjs-dist');
+            
+            // Configure worker - try multiple CDN sources
+            const version = pdfjsLib.version || '3.11.174';
+            
+            // Set worker source - try jsdelivr first as it's often more reliable
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
+
+            const arrayBuffer = await pdfFile.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ 
+                data: arrayBuffer,
+                verbosity: 0, // Suppress console warnings
+                useWorkerFetch: false,
+                isEvalSupported: false
+            });
+            
+            const pdf = await loadingTask.promise;
+            setTotalPages(pdf.numPages);
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 });
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                if (!context) {
+                    throw new Error('Could not get canvas context');
+                }
+                
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise;
+
+                // Wait for blob creation before downloading
+                await new Promise<void>((resolve, reject) => {
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            try {
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = `page-${pageNum}.png`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                URL.revokeObjectURL(url);
+                                resolve();
+                            } catch (err) {
+                                reject(err);
+                            }
+                        } else {
+                            reject(new Error('Failed to create blob'));
+                        }
+                    }, 'image/png');
+                });
+
+                setProgress(Math.round((pageNum / pdf.numPages) * 100));
+            }
+        } catch (error) {
+            console.error('Conversion error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            alert(`Error converting PDF to images: ${errorMessage}. Please try again with a different PDF file.`);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    return (
+        <ToolCard title="PDF to Images">
+            <div className="space-y-4">
+                <Input 
+                    type="file" 
+                    accept="application/pdf" 
+                    onChange={handleFileUpload}
+                    disabled={isProcessing}
+                />
+
+                {pdfFile && (
+                    <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-secondary rounded-lg">
+                            <p className="text-sm text-gray-600 dark:text-text-secondary">
+                                <strong>File:</strong> {pdfFile.name}
+                            </p>
+                            {totalPages > 0 && (
+                                <p className="text-sm text-gray-600 dark:text-text-secondary">
+                                    <strong>Total Pages:</strong> {totalPages}
+                                </p>
+                            )}
+                        </div>
+
+                        {isProcessing && (
+                            <div className="space-y-2">
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                    <div 
+                                        className="bg-accent h-2.5 rounded-full transition-all duration-300"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
+                                <p className="text-sm text-center text-gray-600 dark:text-text-secondary">
+                                    Converting... {progress}%
+                                </p>
+                            </div>
+                        )}
+
+                        {!isProcessing && (
+                            <Button 
+                                onClick={convertToImages} 
+                                className="w-full"
+                            >
+                                Convert to Images
+                            </Button>
+                        )}
+                    </div>
+                )}
+
+                <div className="p-3 bg-accent/10 dark:bg-accent/20 rounded-lg border border-accent/20">
+                    <p className="text-xs text-gray-600 dark:text-text-secondary">
+                        <strong>Note:</strong> Each page will be converted to a PNG image and downloaded separately.
+                    </p>
+                </div>
+            </div>
+        </ToolCard>
+    );
+};
+
+const ImagesToPDF: React.FC<ToolProps> = () => {
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [pageSize, setPageSize] = useState<'A4' | 'Letter'>('A4');
+
+    const handleFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+            setImageFiles(files);
+        }
+    };
+
+    const convertToPDF = async () => {
+        if (imageFiles.length === 0) {
+            alert('Please select at least one image.');
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const { PDFDocument } = await import('pdf-lib');
+            const pdfDoc = await PDFDocument.create();
+
+            const dimensions = {
+                A4: { width: 595, height: 842 },
+                Letter: { width: 612, height: 792 }
+            };
+
+            for (const imageFile of imageFiles) {
+                const arrayBuffer = await imageFile.arrayBuffer();
+                let image;
+                
+                if (imageFile.type === 'image/jpeg' || imageFile.type === 'image/jpg') {
+                    image = await pdfDoc.embedJpg(arrayBuffer);
+                } else if (imageFile.type === 'image/png') {
+                    image = await pdfDoc.embedPng(arrayBuffer);
+                } else {
+                    // Convert to PNG if unsupported format
+                    const img = new Image();
+                    const url = URL.createObjectURL(imageFile);
+                    await new Promise((resolve) => {
+                        img.onload = resolve;
+                        img.src = url;
+                    });
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0);
+                    URL.revokeObjectURL(url);
+                    
+                    const pngData = canvas.toDataURL('image/png');
+                    const pngResponse = await fetch(pngData);
+                    const pngBuffer = await pngResponse.arrayBuffer();
+                    image = await pdfDoc.embedPng(pngBuffer);
+                }
+
+                const dims = dimensions[pageSize];
+                const imageDims = image.scale(1);
+                const scale = Math.min(dims.width / imageDims.width, dims.height / imageDims.height);
+                
+                const page = pdfDoc.addPage([dims.width, dims.height]);
+                page.drawImage(image, {
+                    x: (dims.width - imageDims.width * scale) / 2,
+                    y: (dims.height - imageDims.height * scale) / 2,
+                    width: imageDims.width * scale,
+                    height: imageDims.height * scale,
+                });
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'images-to-pdf.pdf';
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Conversion error:', error);
+            alert('Error converting images to PDF. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    return (
+        <ToolCard title="Images to PDF">
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-2">
+                        Select Multiple Images
+                    </label>
+                    <Input 
+                        type="file" 
+                        accept="image/*" 
+                        multiple
+                        onChange={handleFilesUpload}
+                        disabled={isProcessing}
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-2">
+                        Page Size
+                    </label>
+                    <Select
+                        value={pageSize}
+                        onChange={(e) => setPageSize(e.target.value as 'A4' | 'Letter')}
+                        disabled={isProcessing}
+                    >
+                        <option value="A4">A4</option>
+                        <option value="Letter">Letter</option>
+                    </Select>
+                </div>
+
+                {imageFiles.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-secondary rounded-lg">
+                            <p className="text-sm font-medium text-gray-700 dark:text-text-primary mb-2">
+                                Selected Images ({imageFiles.length}):
+                            </p>
+                            <ul className="text-xs text-gray-600 dark:text-text-secondary space-y-1 max-h-32 overflow-y-auto">
+                                {imageFiles.map((file, index) => (
+                                    <li key={index}>{index + 1}. {file.name}</li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <Button 
+                            onClick={convertToPDF} 
+                            className="w-full"
+                            disabled={isProcessing || imageFiles.length === 0}
+                        >
+                            {isProcessing ? 'Converting...' : 'Convert to PDF'}
+                        </Button>
+                    </div>
+                )}
+
+                <div className="p-3 bg-accent/10 dark:bg-accent/20 rounded-lg border border-accent/20">
+                    <p className="text-xs text-gray-600 dark:text-text-secondary">
+                        <strong>Tip:</strong> Images will be added to the PDF in the order you select them. 
+                        Each image will be scaled to fit the selected page size.
+                    </p>
+                </div>
+            </div>
+        </ToolCard>
+    );
+};
+
+const ImageDrawer: React.FC<ToolProps> = () => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [tool, setTool] = useState<'pen' | 'brush' | 'eraser' | 'rectangle' | 'circle' | 'line' | 'arrow' | 'text' | 'sticker'>('pen');
+    const [color, setColor] = useState('#000000');
+    const [brushSize, setBrushSize] = useState(5);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
+    const [currentPos, setCurrentPos] = useState<{ x: number; y: number } | null>(null);
+    const [textInput, setTextInput] = useState('');
+    const [textPosition, setTextPosition] = useState<{ x: number; y: number } | null>(null);
+    const [showTextInput, setShowTextInput] = useState(false);
+    const [history, setHistory] = useState<ImageData[]>([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+    const [fontSize, setFontSize] = useState(24);
+    const [selectedSticker, setSelectedSticker] = useState<string>('');
+
+    const stickers = ['😀', '😂', '😍', '🤔', '😎', '👍', '❤️', '🔥', '⭐', '💯', '🎉', '🚀', '💪', '👏', '🎯'];
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            const url = URL.createObjectURL(file);
+            setImageUrl(url);
+            loadImageToCanvas(url);
+        }
+    };
+
+    const loadImageToCanvas = (url: string) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const img = new Image();
+        img.onload = () => {
+            // Set canvas size to image size, but limit max size for display
+            const maxWidth = 800;
+            const maxHeight = 600;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = width * ratio;
+                height = height * ratio;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            saveState();
+        };
+        img.src = url;
+    };
+
+    const saveState = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(imageData);
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+    };
+
+    const undo = () => {
+        if (historyIndex > 0) {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const prevState = history[historyIndex - 1];
+            ctx.putImageData(prevState, 0, 0);
+            setHistoryIndex(historyIndex - 1);
+        }
+    };
+
+    const redo = () => {
+        if (historyIndex < history.length - 1) {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const nextState = history[historyIndex + 1];
+            ctx.putImageData(nextState, 0, 0);
+            setHistoryIndex(historyIndex + 1);
+        }
+    };
+
+    const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return { x: 0, y: 0 };
+
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    };
+
+    const drawShape = (ctx: CanvasRenderingContext2D, start: { x: number; y: number }, end: { x: number; y: number }) => {
+        const width = end.x - start.x;
+        const height = end.y - start.y;
+
+        switch (tool) {
+            case 'rectangle':
+                ctx.strokeRect(start.x, start.y, width, height);
+                break;
+            case 'circle':
+                const radius = Math.sqrt(width * width + height * height);
+                ctx.beginPath();
+                ctx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+                break;
+            case 'line':
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+                break;
+            case 'arrow':
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+                // Draw arrowhead
+                const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                const arrowLength = 15;
+                ctx.beginPath();
+                ctx.moveTo(end.x, end.y);
+                ctx.lineTo(
+                    end.x - arrowLength * Math.cos(angle - Math.PI / 6),
+                    end.y - arrowLength * Math.sin(angle - Math.PI / 6)
+                );
+                ctx.moveTo(end.x, end.y);
+                ctx.lineTo(
+                    end.x - arrowLength * Math.cos(angle + Math.PI / 6),
+                    end.y - arrowLength * Math.sin(angle + Math.PI / 6)
+                );
+                ctx.stroke();
+                break;
+        }
+    };
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const pos = getMousePos(e);
+        setIsDrawing(true);
+        setStartPos(pos);
+        setCurrentPos(pos);
+
+        if (tool === 'text') {
+            setTextPosition(pos);
+            setShowTextInput(true);
+        } else if (tool === 'sticker' && selectedSticker) {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            ctx.font = `${fontSize * 2}px Arial`;
+            ctx.fillText(selectedSticker, pos.x, pos.y);
+            saveState();
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const pos = getMousePos(e);
+
+        if (!isDrawing || !startPos) return;
+
+        if (tool === 'pen' || tool === 'brush' || tool === 'eraser') {
+            ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.strokeStyle = tool === 'eraser' ? 'rgba(0,0,0,1)' : color;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(currentPos.x, currentPos.y);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+
+            setCurrentPos(pos);
+        } else if (['rectangle', 'circle', 'line', 'arrow'].includes(tool)) {
+            // Redraw canvas from last saved state
+            if (historyIndex >= 0 && history[historyIndex]) {
+                ctx.putImageData(history[historyIndex], 0, 0);
+            }
+            ctx.strokeStyle = color;
+            ctx.lineWidth = brushSize;
+            drawShape(ctx, startPos, pos);
+        }
+    };
+
+    const handleMouseUp = () => {
+        if (isDrawing && startPos && currentPos && ['rectangle', 'circle', 'line', 'arrow'].includes(tool)) {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            drawShape(ctx, startPos, currentPos);
+            saveState();
+        } else if (tool === 'pen' || tool === 'brush' || tool === 'eraser') {
+            saveState();
+        }
+
+        setIsDrawing(false);
+        setStartPos(null);
+        setCurrentPos(null);
+    };
+
+    const addText = () => {
+        if (!textInput || !textPosition) return;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.fillStyle = color;
+        ctx.font = `${fontSize}px Arial`;
+        ctx.fillText(textInput, textPosition.x, textPosition.y);
+        saveState();
+
+        setTextInput('');
+        setTextPosition(null);
+        setShowTextInput(false);
+    };
+
+    const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (imageUrl) {
+            loadImageToCanvas(imageUrl);
+        } else {
+            saveState();
+        }
+    };
+
+    const downloadImage = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = imageFile ? `edited-${imageFile.name}` : 'drawing.png';
+            link.click();
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    };
+
+    return (
+        <ToolCard title="Image Drawer & Editor">
+            <div className="space-y-4">
+                <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                />
+
+                {!imageUrl && (
+                    <div className="p-8 border-2 border-dashed border-gray-300 dark:border-border rounded-lg text-center">
+                        <p className="text-gray-600 dark:text-text-secondary mb-4">
+                            Upload an image to start drawing, or draw on a blank canvas
+                        </p>
+                        <Button
+                            onClick={() => {
+                                const canvas = canvasRef.current;
+                                if (!canvas) return;
+
+                                canvas.width = 800;
+                                canvas.height = 600;
+                                const ctx = canvas.getContext('2d');
+                                if (!ctx) return;
+
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                saveState();
+                            }}
+                        >
+                            Create Blank Canvas
+                        </Button>
+                    </div>
+                )}
+
+                <div className="flex flex-wrap gap-2 p-2 bg-gray-50 dark:bg-secondary rounded-lg">
+                    <Button
+                        onClick={() => setTool('pen')}
+                        className={tool === 'pen' ? 'bg-accent text-white' : ''}
+                    >
+                        ✏️ Pen
+                    </Button>
+                    <Button
+                        onClick={() => setTool('brush')}
+                        className={tool === 'brush' ? 'bg-accent text-white' : ''}
+                    >
+                        🖌️ Brush
+                    </Button>
+                    <Button
+                        onClick={() => setTool('eraser')}
+                        className={tool === 'eraser' ? 'bg-accent text-white' : ''}
+                    >
+                        🧹 Eraser
+                    </Button>
+                    <Button
+                        onClick={() => setTool('rectangle')}
+                        className={tool === 'rectangle' ? 'bg-accent text-white' : ''}
+                    >
+                        ▭ Rectangle
+                    </Button>
+                    <Button
+                        onClick={() => setTool('circle')}
+                        className={tool === 'circle' ? 'bg-accent text-white' : ''}
+                    >
+                        ⭕ Circle
+                    </Button>
+                    <Button
+                        onClick={() => setTool('line')}
+                        className={tool === 'line' ? 'bg-accent text-white' : ''}
+                    >
+                        ➖ Line
+                    </Button>
+                    <Button
+                        onClick={() => setTool('arrow')}
+                        className={tool === 'arrow' ? 'bg-accent text-white' : ''}
+                    >
+                        ➡️ Arrow
+                    </Button>
+                    <Button
+                        onClick={() => setTool('text')}
+                        className={tool === 'text' ? 'bg-accent text-white' : ''}
+                    >
+                        📝 Text
+                    </Button>
+                    <Button
+                        onClick={() => setTool('sticker')}
+                        className={tool === 'sticker' ? 'bg-accent text-white' : ''}
+                    >
+                        😀 Stickers
+                    </Button>
+                </div>
+
+                {tool === 'sticker' && (
+                    <div className="p-3 bg-gray-50 dark:bg-secondary rounded-lg">
+                        <p className="text-sm font-medium text-gray-700 dark:text-text-primary mb-2">Select Sticker:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {stickers.map((sticker, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setSelectedSticker(sticker)}
+                                    className={`text-2xl p-2 rounded border-2 ${
+                                        selectedSticker === sticker
+                                            ? 'border-accent bg-accent/10'
+                                            : 'border-gray-300 dark:border-border hover:border-accent'
+                                    }`}
+                                >
+                                    {sticker}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-secondary rounded-lg">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-text-primary">Color:</label>
+                        <input
+                            type="color"
+                            value={color}
+                            onChange={(e) => setColor(e.target.value)}
+                            className="w-12 h-8 rounded border border-gray-300 dark:border-border cursor-pointer"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-text-primary">Size:</label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="50"
+                            value={brushSize}
+                            onChange={(e) => setBrushSize(Number(e.target.value))}
+                            className="w-24"
+                        />
+                        <span className="text-sm text-gray-600 dark:text-text-secondary w-8">{brushSize}</span>
+                    </div>
+                    {tool === 'text' && (
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-text-primary">Font:</label>
+                            <input
+                                type="range"
+                                min="12"
+                                max="72"
+                                value={fontSize}
+                                onChange={(e) => setFontSize(Number(e.target.value))}
+                                className="w-24"
+                            />
+                            <span className="text-sm text-gray-600 dark:text-text-secondary w-8">{fontSize}px</span>
+                        </div>
+                    )}
+                </div>
+
+                {showTextInput && (
+                    <div className="p-3 bg-gray-50 dark:bg-secondary rounded-lg">
+                        <Input
+                            type="text"
+                            value={textInput}
+                            onChange={(e) => setTextInput(e.target.value)}
+                            placeholder="Enter text..."
+                            className="mb-2"
+                        />
+                        <div className="flex gap-2">
+                            <Button onClick={addText} className="flex-1">Add Text</Button>
+                            <Button
+                                onClick={() => {
+                                    setShowTextInput(false);
+                                    setTextInput('');
+                                    setTextPosition(null);
+                                }}
+                                className="flex-1 bg-gray-500 hover:bg-gray-600"
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="border border-gray-300 dark:border-border rounded-lg overflow-hidden bg-white">
+                    <canvas
+                        ref={canvasRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                        className="cursor-crosshair w-full max-h-[600px]"
+                        style={{ display: 'block', maxWidth: '100%' }}
+                    />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                    <Button onClick={undo} disabled={historyIndex <= 0}>
+                        ↶ Undo
+                    </Button>
+                    <Button onClick={redo} disabled={historyIndex >= history.length - 1}>
+                        ↷ Redo
+                    </Button>
+                    <Button onClick={clearCanvas} className="bg-red-500 hover:bg-red-600">
+                        🗑️ Clear
+                    </Button>
+                    <Button onClick={downloadImage} className="bg-green-500 hover:bg-green-600 flex-1">
+                        💾 Download
+                    </Button>
+                </div>
+
+                <div className="p-3 bg-accent/10 dark:bg-accent/20 rounded-lg border border-accent/20">
+                    <p className="text-xs text-gray-600 dark:text-text-secondary">
+                        <strong>Tip:</strong> Upload an image or create a blank canvas. Use different tools to draw, add shapes, text, and stickers. 
+                        Perfect for creating memes, annotations, and quick edits!
+                    </p>
+                </div>
+            </div>
+        </ToolCard>
+    );
+};
+
 /* old version landing page
 const LandingPage: React.FC<ToolProps> = () => {
     const categories = [
@@ -2600,10 +3905,22 @@ const LandingPage = () => {
       },
       {
         category: 'Image Tools',
-        description: 'Professional image editing and optimization tools',
+        description: 'Professional image editing, optimization, and text extraction tools',
         tools: [
           { name: 'Image Resizer', desc: 'Resize and compress images for web and social media' },
-          { name: 'Photo Editor', desc: 'Edit photos with filters, adjustments, and text overlays' }
+          { name: 'Photo Editor', desc: 'Edit photos with filters, adjustments, and text overlays' },
+          { name: 'Image to Text (OCR)', desc: 'Extract text from images and screenshots using advanced OCR technology' },
+          { name: 'Image Drawer & Editor', desc: 'Draw, add shapes, text, and stickers on images for memes and annotations' }
+        ]
+      },
+      {
+        category: 'PDF Tools',
+        description: 'Complete PDF management suite for compression, merging, and conversion',
+        tools: [
+          { name: 'PDF Compressor', desc: 'Reduce PDF file size while maintaining quality for easy sharing and storage' },
+          { name: 'PDF Merge', desc: 'Combine multiple PDF files into a single document seamlessly' },
+          { name: 'PDF to Images', desc: 'Convert PDF pages to high-quality image files (PNG, JPG)' },
+          { name: 'Images to PDF', desc: 'Create PDF documents from multiple images in one click' }
         ]
       },
       {
@@ -2651,9 +3968,67 @@ const LandingPage = () => {
           </p>
           <p className="max-w-3xl mx-auto text-gray-700 dark:text-text-primary leading-relaxed">
             Utilifyy is a comprehensive collection of free online tools designed to make your daily tasks easier. 
-            From financial calculators to text editors, unit converters to image tools, we provide everything you need 
-            in one convenient location. All tools work directly in your browser with complete privacy - no data is ever sent to our servers.
+            From financial calculators to text editors, unit converters to image tools, and now PDF management and OCR capabilities, 
+            we provide everything you need in one convenient location. All tools work directly in your browser with complete privacy - no data is ever sent to our servers.
           </p>
+        </section>
+  
+        {/* Recently Added Tools */}
+        <section className="bg-gradient-to-r from-accent/10 to-blue-500/10 dark:from-accent/20 dark:to-blue-500/20 border-2 border-accent/30 dark:border-accent/40 rounded-lg p-8">
+          <div className="flex items-center justify-center mb-6">
+            <span className="bg-accent text-white px-3 py-1 rounded-full text-sm font-semibold mr-3">NEW</span>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Recently Added Tools</h2>
+          </div>
+          <p className="text-center text-gray-600 dark:text-text-secondary mb-8 max-w-2xl mx-auto">
+            We're constantly expanding our toolkit! Check out our latest additions for PDF management and advanced image processing.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-primary border-2 border-accent/50 dark:border-accent/60 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-3">📄</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">PDF Tools Suite</h3>
+              </div>
+              <p className="text-gray-600 dark:text-text-secondary mb-4">
+                Complete PDF management solution with compression, merging, and conversion capabilities.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-text-primary">
+                <li>• <strong>PDF Compressor</strong> - Reduce file size without quality loss</li>
+                <li>• <strong>PDF Merge</strong> - Combine multiple PDFs into one</li>
+                <li>• <strong>PDF to Images</strong> - Convert pages to image files</li>
+                <li>• <strong>Images to PDF</strong> - Create PDFs from image collections</li>
+              </ul>
+            </div>
+            <div className="bg-white dark:bg-primary border-2 border-accent/50 dark:border-accent/60 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-3">🔍</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Image to Text (OCR)</h3>
+              </div>
+              <p className="text-gray-600 dark:text-text-secondary mb-4">
+                Extract text from images, screenshots, and scanned documents using advanced OCR technology.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-text-primary">
+                <li>• Extract text from photos and screenshots</li>
+                <li>• Process scanned documents</li>
+                <li>• Works entirely in your browser</li>
+                <li>• No data sent to external servers</li>
+              </ul>
+            </div>
+            <div className="bg-white dark:bg-primary border-2 border-accent/50 dark:border-accent/60 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-3">✏️</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Image Drawer & Editor</h3>
+              </div>
+              <p className="text-gray-600 dark:text-text-secondary mb-4">
+                Advanced image editing with drawing tools, shapes, text, and stickers for creative projects.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-text-primary">
+                <li>• Draw and annotate images</li>
+                <li>• Add shapes and text overlays</li>
+                <li>• Perfect for memes and annotations</li>
+                <li>• All processing done client-side</li>
+              </ul>
+            </div>
+          </div>
         </section>
   
         {/* Features */}
@@ -2731,6 +4106,32 @@ const LandingPage = () => {
             </p>
           </div>
         </section>
+
+        {/* PDF Tools & OCR Content */}
+        <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">PDF Management & OCR Tools</h2>
+          <div className="prose dark:prose-invert max-w-none">
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Our comprehensive PDF toolkit and OCR capabilities make document management effortless. Whether you need to compress large PDF files, merge multiple documents, convert between formats, or extract text from images, all processing happens securely in your browser without uploading files to external servers.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">PDF Compressor: Reduce File Size Without Quality Loss</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Large PDF files can be difficult to share via email or upload to websites. Our PDF compressor reduces file size while maintaining document quality and readability. Perfect for sharing documents, reducing storage space, or meeting file size requirements for online submissions.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">PDF Merge: Combine Multiple Documents</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Need to combine several PDF files into one? Our PDF merge tool allows you to upload multiple PDF documents and merge them into a single file in the order you choose. Ideal for compiling reports, combining invoices, or organizing related documents.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Image to Text (OCR): Extract Text from Images</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Optical Character Recognition (OCR) technology allows you to extract text from images, screenshots, and scanned documents. Simply upload an image containing text, and our OCR tool will identify and extract all readable text. This is perfect for digitizing printed documents, extracting text from screenshots, or converting scanned pages into editable text. All processing happens in your browser using advanced machine learning models, ensuring your documents never leave your device.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">PDF to Images & Images to PDF: Flexible Format Conversion</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Convert PDF pages to high-quality image files for use in presentations, websites, or social media. Or reverse the process by combining multiple images into a single PDF document. These tools are essential for content creators, students, and professionals who need flexible document formats.
+            </p>
+          </div>
+        </section>
   
         {/* FAQ Section */}
         <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
@@ -2772,6 +4173,8 @@ const LandingPage = () => {
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Popular Tools</h3>
               <ul className="text-sm text-gray-600 dark:text-text-secondary space-y-2">
                 <li>• EMI Calculator</li>
+                <li>• PDF Compressor</li>
+                <li>• Image to Text (OCR)</li>
                 <li>• Unit Converter</li>
                 <li>• Password Generator</li>
                 <li>• Image Resizer</li>
@@ -2791,9 +4194,9 @@ const LandingPage = () => {
         </footer>
         <footer className="text-center text-sm text-gray-500 dark:text-text-secondary py-6">
             <nav className="space-x-4">
-            <a href="/about" className="hover:text-accent">About Us</a>
-            <a href="/privacy" className="hover:text-accent">Privacy Policy</a>
-            <a href="/contact" className="hover:text-accent">Contact Us</a>
+            <a href="#/about" className="hover:text-accent">About Us</a>
+            <a href="#/privacy" className="hover:text-accent">Privacy Policy</a>
+            <a href="#/contact" className="hover:text-accent">Contact Us</a>
             </nav>
             <p className="mt-2">© {new Date().getFullYear()} Utilifyy. All rights reserved.</p>
         </footer>
@@ -2811,6 +4214,7 @@ export const AllTools = {
     Calculator, CurrencyConverter, TipCalculator, DateCalculator, EMICalculator,
     ProfitLossCalculator, SimpleInterestCalculator, SIPCalculator,
     CompoundInterestCalculator, PercentageCalculator, DiscountCalculator,
-    LoremIpsumGenerator, EmojiRemover, ImageResizer, PhotoEditor,
+    LoremIpsumGenerator, EmojiRemover, ImageResizer, PhotoEditor, ImageToText, ImageDrawer,
+    PDFCompressor, PDFMerge, PDFToImages, ImagesToPDF,
     LandingPage
 };
