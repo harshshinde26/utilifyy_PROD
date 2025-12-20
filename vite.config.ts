@@ -20,6 +20,10 @@ export default defineConfig(({ mode }) => {
         }
       },
       publicDir: 'public',
+      optimizeDeps: {
+        force: false,
+        include: ['react', 'react-dom', 'pdf-lib', 'pdfjs-dist', 'tesseract.js'],
+      },
       build: {
         rollupOptions: {
           output: {

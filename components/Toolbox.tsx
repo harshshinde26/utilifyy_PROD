@@ -1272,9 +1272,9 @@ const EMICalculator: React.FC<ToolProps> = ({ selectedCurrency = defaultCurrency
                         <div className="flex gap-2">
                             <Input 
                                 type="number" 
-                                min="1000" 
+                                min="1" 
                                 max="10000000" 
-                                step="1000"
+                                step="1"
                                 value={principal} 
                                 onChange={e => {
                                     const val = Math.max(1000, Math.min(10000000, Number(e.target.value) || 1000));
@@ -1284,9 +1284,9 @@ const EMICalculator: React.FC<ToolProps> = ({ selectedCurrency = defaultCurrency
                             />
                             <input 
                                 type="range" 
-                                min="1000" 
+                                min="1" 
                                 max="1000000" 
-                                step="1000" 
+                                step="1" 
                                 value={principal} 
                                 onChange={e => setPrincipal(Number(e.target.value))} 
                                 className="flex-1 h-2 bg-gray-200 dark:bg-secondary rounded-lg appearance-none cursor-pointer accent-accent" 
@@ -3905,10 +3905,22 @@ const LandingPage = () => {
       },
       {
         category: 'Image Tools',
-        description: 'Professional image editing and optimization tools',
+        description: 'Professional image editing, optimization, and text extraction tools',
         tools: [
           { name: 'Image Resizer', desc: 'Resize and compress images for web and social media' },
-          { name: 'Photo Editor', desc: 'Edit photos with filters, adjustments, and text overlays' }
+          { name: 'Photo Editor', desc: 'Edit photos with filters, adjustments, and text overlays' },
+          { name: 'Image to Text (OCR)', desc: 'Extract text from images and screenshots using advanced OCR technology' },
+          { name: 'Image Drawer & Editor', desc: 'Draw, add shapes, text, and stickers on images for memes and annotations' }
+        ]
+      },
+      {
+        category: 'PDF Tools',
+        description: 'Complete PDF management suite for compression, merging, and conversion',
+        tools: [
+          { name: 'PDF Compressor', desc: 'Reduce PDF file size while maintaining quality for easy sharing and storage' },
+          { name: 'PDF Merge', desc: 'Combine multiple PDF files into a single document seamlessly' },
+          { name: 'PDF to Images', desc: 'Convert PDF pages to high-quality image files (PNG, JPG)' },
+          { name: 'Images to PDF', desc: 'Create PDF documents from multiple images in one click' }
         ]
       },
       {
@@ -3956,9 +3968,67 @@ const LandingPage = () => {
           </p>
           <p className="max-w-3xl mx-auto text-gray-700 dark:text-text-primary leading-relaxed">
             Utilifyy is a comprehensive collection of free online tools designed to make your daily tasks easier. 
-            From financial calculators to text editors, unit converters to image tools, we provide everything you need 
-            in one convenient location. All tools work directly in your browser with complete privacy - no data is ever sent to our servers.
+            From financial calculators to text editors, unit converters to image tools, and now PDF management and OCR capabilities, 
+            we provide everything you need in one convenient location. All tools work directly in your browser with complete privacy - no data is ever sent to our servers.
           </p>
+        </section>
+  
+        {/* Recently Added Tools */}
+        <section className="bg-gradient-to-r from-accent/10 to-blue-500/10 dark:from-accent/20 dark:to-blue-500/20 border-2 border-accent/30 dark:border-accent/40 rounded-lg p-8">
+          <div className="flex items-center justify-center mb-6">
+            <span className="bg-accent text-white px-3 py-1 rounded-full text-sm font-semibold mr-3">NEW</span>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Recently Added Tools</h2>
+          </div>
+          <p className="text-center text-gray-600 dark:text-text-secondary mb-8 max-w-2xl mx-auto">
+            We're constantly expanding our toolkit! Check out our latest additions for PDF management and advanced image processing.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-primary border-2 border-accent/50 dark:border-accent/60 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-3">📄</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">PDF Tools Suite</h3>
+              </div>
+              <p className="text-gray-600 dark:text-text-secondary mb-4">
+                Complete PDF management solution with compression, merging, and conversion capabilities.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-text-primary">
+                <li>• <strong>PDF Compressor</strong> - Reduce file size without quality loss</li>
+                <li>• <strong>PDF Merge</strong> - Combine multiple PDFs into one</li>
+                <li>• <strong>PDF to Images</strong> - Convert pages to image files</li>
+                <li>• <strong>Images to PDF</strong> - Create PDFs from image collections</li>
+              </ul>
+            </div>
+            <div className="bg-white dark:bg-primary border-2 border-accent/50 dark:border-accent/60 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-3">🔍</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Image to Text (OCR)</h3>
+              </div>
+              <p className="text-gray-600 dark:text-text-secondary mb-4">
+                Extract text from images, screenshots, and scanned documents using advanced OCR technology.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-text-primary">
+                <li>• Extract text from photos and screenshots</li>
+                <li>• Process scanned documents</li>
+                <li>• Works entirely in your browser</li>
+                <li>• No data sent to external servers</li>
+              </ul>
+            </div>
+            <div className="bg-white dark:bg-primary border-2 border-accent/50 dark:border-accent/60 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-3">✏️</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Image Drawer & Editor</h3>
+              </div>
+              <p className="text-gray-600 dark:text-text-secondary mb-4">
+                Advanced image editing with drawing tools, shapes, text, and stickers for creative projects.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-text-primary">
+                <li>• Draw and annotate images</li>
+                <li>• Add shapes and text overlays</li>
+                <li>• Perfect for memes and annotations</li>
+                <li>• All processing done client-side</li>
+              </ul>
+            </div>
+          </div>
         </section>
   
         {/* Features */}
@@ -4036,6 +4106,32 @@ const LandingPage = () => {
             </p>
           </div>
         </section>
+
+        {/* PDF Tools & OCR Content */}
+        <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">PDF Management & OCR Tools</h2>
+          <div className="prose dark:prose-invert max-w-none">
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Our comprehensive PDF toolkit and OCR capabilities make document management effortless. Whether you need to compress large PDF files, merge multiple documents, convert between formats, or extract text from images, all processing happens securely in your browser without uploading files to external servers.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">PDF Compressor: Reduce File Size Without Quality Loss</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Large PDF files can be difficult to share via email or upload to websites. Our PDF compressor reduces file size while maintaining document quality and readability. Perfect for sharing documents, reducing storage space, or meeting file size requirements for online submissions.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">PDF Merge: Combine Multiple Documents</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Need to combine several PDF files into one? Our PDF merge tool allows you to upload multiple PDF documents and merge them into a single file in the order you choose. Ideal for compiling reports, combining invoices, or organizing related documents.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Image to Text (OCR): Extract Text from Images</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Optical Character Recognition (OCR) technology allows you to extract text from images, screenshots, and scanned documents. Simply upload an image containing text, and our OCR tool will identify and extract all readable text. This is perfect for digitizing printed documents, extracting text from screenshots, or converting scanned pages into editable text. All processing happens in your browser using advanced machine learning models, ensuring your documents never leave your device.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">PDF to Images & Images to PDF: Flexible Format Conversion</h3>
+            <p className="text-gray-700 dark:text-text-primary mb-4">
+              Convert PDF pages to high-quality image files for use in presentations, websites, or social media. Or reverse the process by combining multiple images into a single PDF document. These tools are essential for content creators, students, and professionals who need flexible document formats.
+            </p>
+          </div>
+        </section>
   
         {/* FAQ Section */}
         <section className="bg-white dark:bg-primary border border-gray-200 dark:border-border rounded-lg p-8">
@@ -4077,6 +4173,8 @@ const LandingPage = () => {
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Popular Tools</h3>
               <ul className="text-sm text-gray-600 dark:text-text-secondary space-y-2">
                 <li>• EMI Calculator</li>
+                <li>• PDF Compressor</li>
+                <li>• Image to Text (OCR)</li>
                 <li>• Unit Converter</li>
                 <li>• Password Generator</li>
                 <li>• Image Resizer</li>
